@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ホールデータまとめ</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- ローディング画面 -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">データを読み込み中...</div>
+            <div class="loading-progress">
+                <div class="loading-progress-bar" id="loadingProgressBar"></div>
+            </div>
+            <div class="loading-status" id="loadingStatus">初期化中...</div>
+        </div>
+    </div>
+    
+    <h1>📊 ホールデータまとめ</h1>
+
+    <!-- タブ -->
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="daily">日別データ</button>
+        <button class="tab-btn" data-tab="trend">差枚トレンド</button>
+        <button class="tab-btn" data-tab="stats">機種別統計</button>
+        <button class="tab-btn" data-tab="calendar">カレンダー</button>
+    </div>
+
+    <!-- 日別データタブ -->
+    <div id="daily" class="tab-content active">
+        <div class="date-nav">
+            <button id="prevDate">◀ 前日</button>
+            <span class="current-date" id="currentDateLabel">-</span>
+            <button id="nextDate">翌日 ▶</button>
+        </div>
+
+        <div class="controls">
+            <select id="dateSelect"></select>
+            <div id="dailyMachineFilterContainer"></div>
+            <input type="text" id="search" placeholder="台番号で検索">
+            <select id="sortBy">
+                <option value="">並び替え</option>
+                <option value="sa_desc">差枚 ↓</option>
+                <option value="sa_asc">差枚 ↑</option>
+                <option value="game_desc">G数 ↓</option>
+                <option value="rate_desc">機械割 ↓</option>
+                <option value="rate_asc">機械割 ↑</option>
+                <option value="machine_asc">機種名 あ→わ</option>
+                <option value="machine_desc">機種名 わ→あ</option>
+                <option value="unit_asc">台番号 ↑</option>
+                <option value="unit_desc">台番号 ↓</option>
+            </select>
+        </div>
+
+        <!-- フィルターパネル（トグル式） -->
+        <div class="filter-panel collapsible">
+            <div class="filter-panel-header" id="filterToggle">
+                <h4>🔍 フィルター・表示設定</h4>
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div class="filter-panel-content" id="filterContent">
+                <!-- 数値フィルター -->
+                <div class="filter-section">
+                    <h5>数値フィルター</h5>
+                    <div class="filter-row">
+                        <div class="filter-item">
+                            <label>差枚</label>
+                            <select id="saFilterType">
+                                <option value="">--</option>
+                                <option value="gte">以上</option>
+                                <option value="lte">以下</option>
+                            </select>
+                            <input type="number" id="saFilterValue" placeholder="枚">
+                        </div>
+                        <div class="filter-item">
+                            <label>G数</label>
+                            <select id="gameFilterType">
+                                <option value="">--</option>
+                                <option value="gte">以上</option>
+                                <option value="lte">以下</option>
+                            </select>
+                            <input type="number" id="gameFilterValue" placeholder="G">
+                        </div>
+                        <div class="filter-item">
+                            <label>機械割</label>
+                            <select id="rateFilterType">
+                                <option value="">--</option>
+                                <option value="gte">以上</option>
+                                <option value="lte">以下</option>
+                            </select>
+                            <input type="number" id="rateFilterValue" placeholder="%" step="0.1">
+                        </div>
+                        <div class="filter-item">
+                            <label>台番号末尾</label>
+                            <select id="unitSuffixFilter">
+                                <option value="">全て</option>
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="filter-buttons">
+                        <button class="btn-apply" id="applyFilter">フィルター適用</button>
+                        <button class="btn-reset" id="resetFilter">リセット</button>
+                    </div>
+                </div>
+
+                <!-- 列選択セクション -->
+                <div class="filter-section">
+                    <h5>📋 表示列</h5>
+                    <div class="column-selector-controls">
+                        <button class="btn-small" id="selectAllColumns">全選択</button>
+                        <button class="btn-small" id="deselectAllColumns">全解除</button>
+                    </div>
+                    <div class="column-checkboxes" id="columnCheckboxes">
+                        <!-- JSで動的に生成 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary" id="summary"></div>
+
+        <!-- コピー・ダウンロードボタン -->
+        <div class="table-actions">
+            <button class="btn-copy" id="copyTableBtn" title="テーブルをクリップボードにコピー">
+                📋 コピー
+            </button>
+            <button class="btn-download" id="downloadCsvBtn" title="CSVファイルをダウンロード">
+                💾 CSV
+            </button>
+        </div>
+
+        <div class="table-wrapper">
+            <table id="data-table">
+                <thead></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 差枚トレンドタブ -->
+    <div id="trend" class="tab-content">
+        <div class="controls">
+            <div class="control-group">
+                <label>表示期間:</label>
+                <button id="openTrendCalendar" class="calendar-btn">📅 日付を選択</button>
+                <span id="trendPeriodLabel" class="period-label-inline">7日間</span>
+            </div>
+            <div class="control-group">
+                <label>表示モード:</label>
+                <select id="trendViewMode">
+                    <option value="unit">台別</option>
+                    <option value="machine">機種別</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>値タイプ:</label>
+                <select id="trendMachineValueType">
+                    <option value="total">総差枚</option>
+                    <option value="avg">平均差枚</option>
+                    <option value="winrate">勝率</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>機種:</label>
+                <div id="trendMachineFilterContainer"></div>
+            </div>
+            <div class="control-group">
+                <label>並び替え:</label>
+                <select id="trendSortBy">
+                    <option value="total_desc">合計差枚 多い順</option>
+                    <option value="total_asc">合計差枚 少ない順</option>
+                    <option value="avg_desc">平均差枚 多い順</option>
+                    <option value="latest_desc">最新日 差枚多い順</option>
+                    <option value="prevtotal_desc">最新日以前差枚 多い順</option>
+                    <option value="prevtotal_asc">最新日以前差枚 少ない順</option>
+                    <option value="machine_asc">機種名 あ→わ</option>
+                    <option value="machine_desc">機種名 わ→あ</option>
+                    <option value="unit_asc">台番号 ↑</option>
+                    <option value="unit_desc">台番号 ↓</option>
+                </select>
+            </div>
+            <button id="loadTrend" class="btn-apply">表示更新</button>
+        </div>
+    
+        <!-- フィルター・表示設定パネル -->
+        <div class="filter-panel collapsible">
+            <div class="filter-panel-header" id="trendFilterToggle">
+                <h4>🔍 フィルター・表示設定</h4>
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div class="filter-panel-content" id="trendFilterContent">
+                <!-- 合計差枚フィルター -->
+                <div class="filter-section">
+                    <h5>数値フィルター</h5>
+                    <div class="filter-row">
+                        <div class="filter-item">
+                            <label>合計差枚</label>
+                            <select id="trendTotalFilterType">
+                                <option value="">--</option>
+                                <option value="gte">以上</option>
+                                <option value="lte">以下</option>
+                            </select>
+                            <input type="number" id="trendTotalFilterValue" placeholder="枚">
+                        </div>
+                        <div class="filter-item">
+                            <label>最新日以前</label>
+                            <select id="trendPrevTotalFilterType">
+                                <option value="">--</option>
+                                <option value="gte">以上</option>
+                                <option value="lte">以下</option>
+                            </select>
+                            <input type="number" id="trendPrevTotalFilterValue" placeholder="枚">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 列表示設定 -->
+                <div class="filter-section">
+                    <h5>📋 表示列</h5>
+                    <div class="column-checkboxes">
+                        <label class="column-checkbox-item">
+                            <input type="checkbox" id="trendShowTotal" checked>
+                            <span>合計</span>
+                        </label>
+                        <label class="column-checkbox-item">
+                            <input type="checkbox" id="trendShowAvg" checked>
+                            <span>平均</span>
+                        </label>
+                        <label class="column-checkbox-item">
+                            <input type="checkbox" id="trendShowPrevTotal">
+                            <span>最新日以前</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- グラフ表示設定 -->
+                <div class="filter-section">
+                    <h5>📈 グラフ表示</h5>
+                    <div class="column-checkboxes">
+                        <label class="column-checkbox-item">
+                            <input type="checkbox" id="trendShowChart" checked>
+                            <span>グラフを表示</span>
+                        </label>
+                    </div>
+                </div>
+            
+                <div class="filter-buttons">
+                    <button class="btn-reset" id="resetTrendFilter">リセット</button>
+                </div>
+            </div>
+        </div>
+    
+        <!-- カレンダー日付選択モーダル -->
+        <div id="trendCalendarModal" class="calendar-modal">
+            <div class="calendar-modal-content calendar-modal-large">
+                <div class="calendar-modal-header">
+                    <h3>表示する日付を選択</h3>
+                    <button id="closeTrendCalendar" class="close-btn">×</button>
+                </div>
+                <!-- クイック選択・フィルターパネル -->
+                <div id="trendFilterContainer" class="trend-modal-filters"></div>
+                <div class="calendar-modal-body">
+                    <div id="trendDateList" class="date-checkbox-list"></div>
+                </div>
+                <div class="calendar-modal-footer">
+                    <button id="selectAllDates" class="modal-btn">全選択</button>
+                    <button id="deselectAllDates" class="modal-btn">全解除</button>
+                    <button id="applyTrendDates" class="modal-btn primary">適用</button>
+                </div>
+            </div>
+        </div>
+    
+        <div id="trendSummary" class="summary"></div>
+    
+        <!-- グラフコンテナ（トグルで表示/非表示可能） -->
+        <div class="trend-chart-container">
+            <div class="chart-header">
+                <h4>📈 差枚推移グラフ</h4>
+                <div class="chart-controls">
+                    <label>
+                        <input type="checkbox" id="chartShowTop" checked>
+                        上位5台
+                    </label>
+                    <label>
+                        <input type="checkbox" id="chartShowBottom">
+                        下位5台
+                    </label>
+                    <select id="chartDisplayCount">
+                        <option value="5">5台表示</option>
+                        <option value="10">10台表示</option>
+                        <option value="20">20台表示</option>
+                    </select>
+                </div>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+    
+        <!-- コピー・ダウンロードボタン -->
+        <div class="table-actions">
+            <button class="btn-copy" id="copyTrendTableBtn" title="テーブルをクリップボードにコピー">
+                📋 コピー
+            </button>
+            <button class="btn-download" id="downloadTrendCsvBtn" title="CSVファイルをダウンロード">
+                💾 CSV
+            </button>
+        </div>
+    
+        <div class="table-wrapper has-scrollbar">
+            <div class="fixed-columns">
+                <table id="trend-fixed-table">
+                    <thead></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="scroll-columns">
+                <table id="trend-scroll-table">
+                    <thead></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 機種別統計タブ -->
+    <div id="stats" class="tab-content">
+        <div class="stats-mode-selector">
+            <button class="stats-mode-btn active" data-mode="daily">日別</button>
+            <button class="stats-mode-btn" data-mode="period">期間集計</button>
+        </div>
+
+        <!-- 日別モード -->
+        <div id="stats-daily-content" class="stats-mode-content active">
+            <!-- 日付ナビゲーション -->
+            <div class="date-nav stats-date-nav">
+                <button id="statsPrevDate">◀ 前日</button>
+                <span class="current-date" id="statsCurrentDateLabel">-</span>
+                <button id="statsNextDate">翌日 ▶</button>
+            </div>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <label>日付:</label>
+                    <select id="statsDateSelect"></select>
+                </div>
+                <div class="control-group">
+                    <label>機種:</label>
+                    <div id="statsDailyMachineFilterContainer"></div>
+                </div>
+                <div class="control-group stats-unit-suffix-filter" style="display: none;">
+                    <label>台番号末尾:</label>
+                    <select id="statsUnitSuffixFilter">
+                        <option value="">全て</option>
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>並び替え:</label>
+                    <select id="statsSortBy">
+                        <option value="total_desc">総差枚 多い順</option>
+                        <option value="total_asc">総差枚 少ない順</option>
+                        <option value="avg_desc">平均差枚 多い順</option>
+                        <option value="avg_asc">平均差枚 少ない順</option>
+                        <option value="count_desc">台数 多い順</option>
+                        <option value="winrate_desc">勝率 高い順</option>
+                        <option value="winrate_asc">勝率 低い順</option>
+                        <option value="machine_asc">機種名 あ→わ</option>
+                        <option value="machine_desc">機種名 わ→あ</option>
+                        <option value="unit_asc">台番号 ↑</option>
+                        <option value="unit_desc">台番号 ↓</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- 期間集計モード -->
+        <div id="stats-period-content" class="stats-mode-content">
+            <div class="controls">
+                <div class="control-group">
+                    <label>開始日:</label>
+                    <select id="statsPeriodStart"></select>
+                </div>
+                <div class="control-group">
+                    <label>終了日:</label>
+                    <select id="statsPeriodEnd"></select>
+                </div>
+                <div class="control-group">
+                    <label>曜日:</label>
+                    <select id="statsDayOfWeek">
+                        <option value="">全曜日</option>
+                        <option value="0">日曜</option>
+                        <option value="1">月曜</option>
+                        <option value="2">火曜</option>
+                        <option value="3">水曜</option>
+                        <option value="4">木曜</option>
+                        <option value="5">金曜</option>
+                        <option value="6">土曜</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>日付末尾:</label>
+                    <select id="statsDateSuffix">
+                        <option value="">全日付</option>
+                        <option value="0">0のつく日</option>
+                        <option value="1">1のつく日</option>
+                        <option value="2">2のつく日</option>
+                        <option value="3">3のつく日</option>
+                        <option value="4">4のつく日</option>
+                        <option value="5">5のつく日</option>
+                        <option value="6">6のつく日</option>
+                        <option value="7">7のつく日</option>
+                        <option value="8">8のつく日</option>
+                        <option value="9">9のつく日</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>イベント:</label>
+                    <div id="statsEventFilterContainer"></div>
+                </div>
+                <div class="control-group">
+                    <label>メディア:</label>
+                    <div id="statsMediaFilterContainer"></div>
+                </div>
+                <div class="control-group">
+                    <label>演者:</label>
+                    <div id="statsPerformerFilterContainer"></div>
+                </div>
+                <div class="control-group">
+                    <label>機種:</label>
+                    <div id="statsMachineFilterContainer"></div>
+                </div>
+                <div class="control-group stats-period-unit-suffix-filter" style="display: none;">
+                    <label>台番号末尾:</label>
+                    <select id="statsPeriodUnitSuffixFilter">
+                        <option value="">全て</option>
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>並び替え:</label>
+                    <select id="statsPeriodSortBy">
+                        <option value="total_desc">総差枚 多い順</option>
+                        <option value="total_asc">総差枚 少ない順</option>
+                        <option value="avg_desc">平均差枚 多い順</option>
+                        <option value="avg_asc">平均差枚 少ない順</option>
+                        <option value="count_desc">延べ台数 多い順</option>
+                        <option value="winrate_desc">勝率 高い順</option>
+                        <option value="winrate_asc">勝率 低い順</option>
+                        <option value="machine_asc">機種名 あ→わ</option>
+                        <option value="machine_desc">機種名 わ→あ</option>
+                        <option value="unit_asc">台番号 ↑</option>
+                        <option value="unit_desc">台番号 ↓</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- コピー・ダウンロードボタンを追加 -->
+        <div class="table-actions" id="statsTableActions">
+            <button class="btn-copy" id="copyStatsTableBtn" title="テーブルをクリップボードにコピー">
+                📋 コピー
+            </button>
+            <button class="btn-download" id="downloadStatsCsvBtn" title="CSVファイルをダウンロード">
+                💾 CSV
+            </button>
+        </div>
+
+        <div id="statsContent"></div>
+    </div>
+
+    <!-- カレンダータブ -->
+    <div id="calendar" class="tab-content">
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <button id="prevMonth">◀ 前月</button>
+                <h2 id="calendarMonth"></h2>
+                <button id="nextMonth">次月 ▶</button>
+            </div>
+
+            <!-- イベントフィルター -->
+            <div id="calendarFilter" class="calendar-filter-container"></div>
+
+            <!-- スクロール可能なエリア -->
+            <div class="calendar-scroll-wrapper">
+                <div class="calendar-weekdays">
+                    <div class="weekday sunday">日</div>
+                    <div class="weekday">月</div>
+                    <div class="weekday">火</div>
+                    <div class="weekday">水</div>
+                    <div class="weekday">木</div>
+                    <div class="weekday">金</div>
+                    <div class="weekday saturday">土</div>
+                </div>
+                <div class="calendar-days" id="calendarDays"></div>
+            </div>
+
+            <div class="calendar-legend">
+                <div class="legend-item">
+                    <span class="legend-bar avg-sa"></span>
+                    <span>平均差枚</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-bar avg-game"></span>
+                    <span>平均G数</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-bar win-rate"></span>
+                    <span>勝率</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-bar total-sa"></span>
+                    <span>総差枚</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- スクリプト読み込み -->
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/chart.js"></script>
+    <script src="js/daily.js"></script>
+    <script src="js/trend.js"></script>
+    <script src="js/stats.js"></script>
+    <script src="js/calendar.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
