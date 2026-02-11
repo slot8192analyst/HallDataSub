@@ -26,7 +26,6 @@
     <div class="tabs">
         <button class="tab-btn active" data-tab="daily">日別データ</button>
         <button class="tab-btn" data-tab="trend">差枚トレンド</button>
-        <button class="tab-btn" data-tab="stats">機種別統計</button>
         <button class="tab-btn" data-tab="calendar">カレンダー</button>
     </div>
 
@@ -337,170 +336,6 @@
         </div>
     </div>
 
-    <!-- 機種別統計タブ -->
-    <div id="stats" class="tab-content">
-        <div class="stats-mode-selector">
-            <button class="stats-mode-btn active" data-mode="daily">日別</button>
-            <button class="stats-mode-btn" data-mode="period">期間集計</button>
-        </div>
-
-        <!-- 日別モード -->
-        <div id="stats-daily-content" class="stats-mode-content active">
-            <!-- 日付ナビゲーション -->
-            <div class="date-nav stats-date-nav">
-                <button id="statsPrevDate">◀ 前日</button>
-                <span class="current-date" id="statsCurrentDateLabel">-</span>
-                <button id="statsNextDate">翌日 ▶</button>
-            </div>
-            
-            <div class="controls">
-                <div class="control-group">
-                    <label>日付:</label>
-                    <select id="statsDateSelect"></select>
-                </div>
-                <div class="control-group">
-                    <label>機種:</label>
-                    <div id="statsDailyMachineFilterContainer"></div>
-                </div>
-                <div class="control-group stats-unit-suffix-filter" style="display: none;">
-                    <label>台番号末尾:</label>
-                    <select id="statsUnitSuffixFilter">
-                        <option value="">全て</option>
-                        <option value="0">0</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                        <option value="6">6</option>
-                        <option value="7">7</option>
-                        <option value="8">8</option>
-                        <option value="9">9</option>
-                    </select>
-                </div>
-                <div class="control-group">
-                    <label>並び替え:</label>
-                    <select id="statsSortBy">
-                        <option value="total_desc">総差枚 多い順</option>
-                        <option value="total_asc">総差枚 少ない順</option>
-                        <option value="avg_desc">平均差枚 多い順</option>
-                        <option value="avg_asc">平均差枚 少ない順</option>
-                        <option value="count_desc">台数 多い順</option>
-                        <option value="winrate_desc">勝率 高い順</option>
-                        <option value="winrate_asc">勝率 低い順</option>
-                        <option value="machine_asc">機種名 あ→わ</option>
-                        <option value="machine_desc">機種名 わ→あ</option>
-                        <option value="unit_asc">台番号 ↑</option>
-                        <option value="unit_desc">台番号 ↓</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <!-- 期間集計モード -->
-        <div id="stats-period-content" class="stats-mode-content">
-            <div class="controls">
-                <div class="control-group">
-                    <label>開始日:</label>
-                    <select id="statsPeriodStart"></select>
-                </div>
-                <div class="control-group">
-                    <label>終了日:</label>
-                    <select id="statsPeriodEnd"></select>
-                </div>
-                <div class="control-group">
-                    <label>曜日:</label>
-                    <select id="statsDayOfWeek">
-                        <option value="">全曜日</option>
-                        <option value="0">日曜</option>
-                        <option value="1">月曜</option>
-                        <option value="2">火曜</option>
-                        <option value="3">水曜</option>
-                        <option value="4">木曜</option>
-                        <option value="5">金曜</option>
-                        <option value="6">土曜</option>
-                    </select>
-                </div>
-                <div class="control-group">
-                    <label>日付末尾:</label>
-                    <select id="statsDateSuffix">
-                        <option value="">全日付</option>
-                        <option value="0">0のつく日</option>
-                        <option value="1">1のつく日</option>
-                        <option value="2">2のつく日</option>
-                        <option value="3">3のつく日</option>
-                        <option value="4">4のつく日</option>
-                        <option value="5">5のつく日</option>
-                        <option value="6">6のつく日</option>
-                        <option value="7">7のつく日</option>
-                        <option value="8">8のつく日</option>
-                        <option value="9">9のつく日</option>
-                    </select>
-                </div>
-                <div class="control-group">
-                    <label>イベント:</label>
-                    <div id="statsEventFilterContainer"></div>
-                </div>
-                <div class="control-group">
-                    <label>メディア:</label>
-                    <div id="statsMediaFilterContainer"></div>
-                </div>
-                <div class="control-group">
-                    <label>演者:</label>
-                    <div id="statsPerformerFilterContainer"></div>
-                </div>
-                <div class="control-group">
-                    <label>機種:</label>
-                    <div id="statsMachineFilterContainer"></div>
-                </div>
-                <div class="control-group stats-period-unit-suffix-filter" style="display: none;">
-                    <label>台番号末尾:</label>
-                    <select id="statsPeriodUnitSuffixFilter">
-                        <option value="">全て</option>
-                        <option value="0">0</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                        <option value="6">6</option>
-                        <option value="7">7</option>
-                        <option value="8">8</option>
-                        <option value="9">9</option>
-                    </select>
-                </div>
-                <div class="control-group">
-                    <label>並び替え:</label>
-                    <select id="statsPeriodSortBy">
-                        <option value="total_desc">総差枚 多い順</option>
-                        <option value="total_asc">総差枚 少ない順</option>
-                        <option value="avg_desc">平均差枚 多い順</option>
-                        <option value="avg_asc">平均差枚 少ない順</option>
-                        <option value="count_desc">延べ台数 多い順</option>
-                        <option value="winrate_desc">勝率 高い順</option>
-                        <option value="winrate_asc">勝率 低い順</option>
-                        <option value="machine_asc">機種名 あ→わ</option>
-                        <option value="machine_desc">機種名 わ→あ</option>
-                        <option value="unit_asc">台番号 ↑</option>
-                        <option value="unit_desc">台番号 ↓</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <!-- コピー・ダウンロードボタンを追加 -->
-        <div class="table-actions" id="statsTableActions">
-            <button class="btn-copy" id="copyStatsTableBtn" title="テーブルをクリップボードにコピー">
-                📋 コピー
-            </button>
-            <button class="btn-download" id="downloadStatsCsvBtn" title="CSVファイルをダウンロード">
-                💾 CSV
-            </button>
-        </div>
-
-        <div id="statsContent"></div>
-    </div>
-
     <!-- カレンダータブ -->
     <div id="calendar" class="tab-content">
         <div class="calendar-container">
@@ -555,7 +390,6 @@
     <script src="js/chart.js"></script>
     <script src="js/daily.js"></script>
     <script src="js/trend.js"></script>
-    <script src="js/stats.js"></script>
     <script src="js/calendar.js"></script>
     <script src="js/app.js"></script>
 </body>

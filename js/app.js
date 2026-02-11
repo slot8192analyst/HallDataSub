@@ -37,8 +37,6 @@ function setupTabEventListeners() {
                 renderCalendar();
             } else if (btn.dataset.tab === 'trend') {
                 loadTrendData();
-            } else if (btn.dataset.tab === 'stats') {
-                showStats();
             }
         });
     });
@@ -76,16 +74,15 @@ async function init() {
     setupDailyEventListeners();
     setupTrendEventListeners();
     document.getElementById('trendViewMode')?.addEventListener('change', function() {
-    var machineValueTypeGroup = document.getElementById('machineValueTypeGroup');
-    if (machineValueTypeGroup) {
-        if (this.value === 'machine') {
-            machineValueTypeGroup.style.display = 'flex';
-        } else {
-            machineValueTypeGroup.style.display = 'none';
+        var machineValueTypeGroup = document.getElementById('machineValueTypeGroup');
+        if (machineValueTypeGroup) {
+            if (this.value === 'machine') {
+                machineValueTypeGroup.style.display = 'flex';
+            } else {
+                machineValueTypeGroup.style.display = 'none';
+            }
         }
-    }
-});
-    setupStatsEventListeners();
+    });
     setupCalendarEventListeners();
 
     setupFilterPanelToggle('trendFilterToggle', 'trendFilterContent');
@@ -109,19 +106,10 @@ async function init() {
 document.addEventListener('DOMContentLoaded', init);
 
 function populateMachineFilters() {
-    // 各タブ専用の初期化関数を呼び出す
-    // （各関数内で適切な日付のデータから機種リストを取得）
-    
     if (typeof initDailyMachineFilter === 'function') {
         initDailyMachineFilter();
     }
     if (typeof initTrendMachineFilter === 'function') {
         initTrendMachineFilter();
-    }
-    if (typeof updateStatsMachineFilter === 'function') {
-        updateStatsMachineFilter();
-    }
-    if (typeof updateStatsDailyMachineFilter === 'function') {
-        updateStatsDailyMachineFilter();
     }
 }
