@@ -25,6 +25,7 @@
     <!-- タブ -->
     <div class="tabs">
         <button class="tab-btn active" data-tab="daily">日別データ</button>
+        <button class="tab-btn" data-tab="compare">日別比較</button>
         <button class="tab-btn" data-tab="trend">データトレンド</button>
         <button class="tab-btn" data-tab="calendar">カレンダー</button>
     </div>
@@ -62,7 +63,6 @@
                 <span class="toggle-icon">▼</span>
             </div>
             <div class="filter-panel-content" id="filterContent">
-                <!-- 数値フィルター -->
                 <div class="filter-section">
                     <h5>数値フィルター</h5>
                     <div class="filter-row">
@@ -115,31 +115,22 @@
                         <button class="btn-reset" id="resetFilter">リセット</button>
                     </div>
                 </div>
-
-                <!-- 列選択セクション -->
                 <div class="filter-section">
                     <h5>📋 表示列</h5>
                     <div class="column-selector-controls">
                         <button class="btn-small" id="selectAllColumns">全選択</button>
                         <button class="btn-small" id="deselectAllColumns">全解除</button>
                     </div>
-                    <div class="column-checkboxes" id="columnCheckboxes">
-                        <!-- JSで動的に生成 -->
-                    </div>
+                    <div class="column-checkboxes" id="columnCheckboxes"></div>
                 </div>
             </div>
         </div>
 
         <div class="summary" id="summary"></div>
 
-        <!-- コピー・ダウンロードボタン -->
         <div class="table-actions">
-            <button class="btn-copy" id="copyTableBtn" title="テーブルをクリップボードにコピー">
-                📋 コピー
-            </button>
-            <button class="btn-download" id="downloadCsvBtn" title="CSVファイルをダウンロード">
-                💾 CSV
-            </button>
+            <button class="btn-copy" id="copyTableBtn" title="テーブルをクリップボードにコピー">📋 コピー</button>
+            <button class="btn-download" id="downloadCsvBtn" title="CSVファイルをダウンロード">💾 CSV</button>
         </div>
 
         <div class="table-wrapper">
@@ -150,7 +141,184 @@
         </div>
     </div>
 
-    <!-- 差枚トレンドタブ → データトレンドタブに変更 -->
+    <!-- 日別比較タブ -->
+    <div id="compare" class="tab-content">
+        <div class="compare-header">
+            <h2>📅 日別データ比較</h2>
+            <p class="compare-description">2つの日付のデータを並べて比較します</p>
+        </div>
+
+        <div class="compare-date-selectors">
+            <div class="compare-date-group">
+                <label>前回</label>
+                <select id="compareDateA"></select>
+                <span class="compare-date-info" id="compareDateAInfo"></span>
+            </div>
+            <div class="compare-swap-btn-wrapper">
+                <button id="compareSwapDates" class="btn-swap" title="日付を入れ替え">⇄</button>
+            </div>
+            <div class="compare-date-group">
+                <label>今回</label>
+                <select id="compareDateB"></select>
+                <span class="compare-date-info" id="compareDateBInfo"></span>
+            </div>
+        </div>
+
+        <div class="compare-controls">
+            <div class="control-group">
+                <label>比較項目:</label>
+                <select id="compareDataColumn">
+                    <option value="差枚">差枚</option>
+                    <option value="G数">G数</option>
+                    <option value="BB">BB回数</option>
+                    <option value="RB">RB回数</option>
+                    <option value="ART">ART回数</option>
+                    <option value="機械割">機械割</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>機種:</label>
+                <div id="compareMachineFilterContainer"></div>
+            </div>
+            <div class="control-group">
+                <label>並び替え:</label>
+                <select id="compareSortBy">
+                    <option value="diff_desc">差分 多い順</option>
+                    <option value="diff_asc">差分 少ない順</option>
+                    <option value="a_desc">前回 多い順</option>
+                    <option value="a_asc">前回 少ない順</option>
+                    <option value="b_desc">今回 多い順</option>
+                    <option value="b_asc">今回 少ない順</option>
+                    <option value="unit_asc">台番号 ↑</option>
+                    <option value="unit_desc">台番号 ↓</option>
+                    <option value="machine_asc">機種名 あ→わ</option>
+                </select>
+            </div>
+            <button id="loadCompare" class="btn-apply">比較実行</button>
+        </div>
+
+        <!-- フィルターパネル -->
+        <div class="filter-panel collapsible">
+            <div class="filter-panel-header" id="compareFilterToggle">
+                <h4>🔍 フィルター設定</h4>
+                <span class="toggle-icon">▼</span>
+            </div>
+            <div class="filter-panel-content" id="compareFilterContent">
+                <div class="filter-section">
+                    <h5>数値フィルター</h5>
+                    <div class="filter-row">
+                        <div class="filter-item">
+                            <label>差分</label>
+                            <select id="compareDiffFilterType">
+                                <option value="">--</option>
+                                <option value="gte">以上</option>
+                                <option value="lte">以下</option>
+                            </select>
+                            <input type="number" id="compareDiffFilterValue" placeholder="値">
+                        </div>
+                        <div class="filter-item">
+                            <label>表示</label>
+                            <select id="compareShowFilter">
+                                <option value="">全て</option>
+                                <option value="improved">改善のみ（今回 > 前回）</option>
+                                <option value="declined">悪化のみ（今回 < 前回）</option>
+                                <option value="both">両日データあり</option>
+                            </select>
+                        </div>
+                        <div class="filter-item">
+                            <label>台番号末尾</label>
+                            <select id="compareUnitSuffixFilter">
+                                <option value="">全て</option>
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                                <option value="6">6</option>
+                                <option value="7">7</option>
+                                <option value="8">8</option>
+                                <option value="9">9</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="filter-buttons">
+                        <button class="btn-reset" id="resetCompareFilter">リセット</button>
+                    </div>
+                </div>
+
+                <!-- 高設定タグ条件セクション -->
+                <div class="filter-section">
+                    <h5>🏷️ 高設定タグ条件</h5>
+                    <p class="filter-hint">グループ内の条件はAND（すべて満たす）、グループ同士はOR（いずれか満たす）で判定します</p>
+                    
+                    <div class="high-setting-tag-config">
+                        <div class="tag-groups-list" id="tagGroupsList"></div>
+
+                        <div class="tag-groups-actions">
+                            <button class="btn-small" id="addTagGroup">＋ 条件グループを追加</button>
+                        </div>
+
+                        <div class="tag-preset-row">
+                            <span class="tag-preset-label">プリセット:</span>
+                            <div class="tag-preset-buttons">
+                                <button class="preset-btn" data-preset="suspect">高設定疑惑</button>
+                            </div>
+                        </div>
+
+                        <div class="tag-display-row">
+                            <label class="column-checkbox-item">
+                                <input type="checkbox" id="showHighSettingOnly">
+                                <span>高設定タグ付きのみ表示</span>
+                            </label>
+                            <label class="column-checkbox-item">
+                                <input type="checkbox" id="showTagBothDays">
+                                <span>両日タグ付きのみ</span>
+                            </label>
+                            <span class="tag-count-display" id="tagCountDisplay"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- サマリー -->
+        <div class="compare-summary-cards" id="compareSummary"></div>
+
+        <!-- 高設定分析パネル -->
+        <div class="compare-analysis-container" id="compareAnalysisContainer">
+            <div class="analysis-header">
+                <h4>🏷️ 高設定タグ分析</h4>
+                <div class="analysis-controls">
+                    <div class="control-group">
+                        <label>表示:</label>
+                        <select id="analysisViewMode">
+                            <option value="overall">全体</option>
+                            <option value="machine">機種別</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="analysis-summary" id="analysisSummary"></div>
+            <div class="analysis-tables" id="analysisTables"></div>
+        </div>
+
+        <!-- テーブルアクション -->
+        <div class="table-actions">
+            <button class="btn-copy" id="copyCompareTableBtn" title="テーブルをクリップボードにコピー">📋 コピー</button>
+            <button class="btn-download" id="downloadCompareCsvBtn" title="CSVファイルをダウンロード">💾 CSV</button>
+        </div>
+
+        <!-- 比較テーブル -->
+        <div class="table-wrapper">
+            <table id="compare-table">
+                <thead></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- データトレンドタブ -->
     <div id="trend" class="tab-content">
         <div class="controls">
             <div class="control-group">
@@ -208,14 +376,12 @@
             <button id="loadTrend" class="btn-apply">表示更新</button>
         </div>
 
-        <!-- フィルター・表示設定パネル -->
         <div class="filter-panel collapsible">
             <div class="filter-panel-header" id="trendFilterToggle">
                 <h4>🔍 フィルター・表示設定</h4>
                 <span class="toggle-icon">▼</span>
             </div>
             <div class="filter-panel-content" id="trendFilterContent">
-                <!-- 数値フィルター -->
                 <div class="filter-section">
                     <h5>数値フィルター</h5>
                     <div class="filter-row">
@@ -239,8 +405,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- 列表示設定 -->
                 <div class="filter-section">
                     <h5>📋 表示列</h5>
                     <div class="column-checkboxes">
@@ -258,8 +422,6 @@
                         </label>
                     </div>
                 </div>
-
-                <!-- グラフ表示設定 -->
                 <div class="filter-section">
                     <h5>📈 グラフ表示</h5>
                     <div class="column-checkboxes">
@@ -269,21 +431,18 @@
                         </label>
                     </div>
                 </div>
-            
                 <div class="filter-buttons">
                     <button class="btn-reset" id="resetTrendFilter">リセット</button>
                 </div>
             </div>
         </div>
 
-        <!-- カレンダー日付選択モーダル -->
         <div id="trendCalendarModal" class="calendar-modal">
             <div class="calendar-modal-content calendar-modal-large">
                 <div class="calendar-modal-header">
                     <h3>表示する日付を選択</h3>
                     <button id="closeTrendCalendar" class="close-btn">×</button>
                 </div>
-                <!-- クイック選択・フィルターパネル -->
                 <div id="trendFilterContainer" class="trend-modal-filters"></div>
                 <div class="calendar-modal-body">
                     <div id="trendDateList" class="date-checkbox-list"></div>
@@ -298,19 +457,12 @@
 
         <div id="trendSummary" class="summary"></div>
 
-        <!-- グラフコンテナ -->
         <div class="trend-chart-container">
             <div class="chart-header">
                 <h4 id="trendChartTitle">📈 差枚推移グラフ</h4>
                 <div class="chart-controls">
-                    <label>
-                        <input type="checkbox" id="chartShowTop" checked>
-                        上位
-                    </label>
-                    <label>
-                        <input type="checkbox" id="chartShowBottom">
-                        下位
-                    </label>
+                    <label><input type="checkbox" id="chartShowTop" checked> 上位</label>
+                    <label><input type="checkbox" id="chartShowBottom"> 下位</label>
                     <select id="chartDisplayCount">
                         <option value="5">5件表示</option>
                         <option value="10">10件表示</option>
@@ -327,14 +479,9 @@
             </div>
         </div>
 
-        <!-- コピー・ダウンロードボタン -->
         <div class="table-actions">
-            <button class="btn-copy" id="copyTrendTableBtn" title="テーブルをクリップボードにコピー">
-                📋 コピー
-            </button>
-            <button class="btn-download" id="downloadTrendCsvBtn" title="CSVファイルをダウンロード">
-                💾 CSV
-            </button>
+            <button class="btn-copy" id="copyTrendTableBtn" title="テーブルをクリップボードにコピー">📋 コピー</button>
+            <button class="btn-download" id="downloadTrendCsvBtn" title="CSVファイルをダウンロード">💾 CSV</button>
         </div>
 
         <div class="table-wrapper has-scrollbar">
@@ -361,11 +508,7 @@
                 <h2 id="calendarMonth"></h2>
                 <button id="nextMonth">次月 ▶</button>
             </div>
-
-            <!-- イベントフィルター -->
             <div id="calendarFilter" class="calendar-filter-container"></div>
-
-            <!-- スクロール可能なエリア -->
             <div class="calendar-scroll-wrapper">
                 <div class="calendar-weekdays">
                     <div class="weekday sunday">日</div>
@@ -378,24 +521,11 @@
                 </div>
                 <div class="calendar-days" id="calendarDays"></div>
             </div>
-
             <div class="calendar-legend">
-                <div class="legend-item">
-                    <span class="legend-bar avg-sa"></span>
-                    <span>平均差枚</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-bar avg-game"></span>
-                    <span>平均G数</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-bar win-rate"></span>
-                    <span>勝率</span>
-                </div>
-                <div class="legend-item">
-                    <span class="legend-bar total-sa"></span>
-                    <span>総差枚</span>
-                </div>
+                <div class="legend-item"><span class="legend-bar avg-sa"></span><span>平均差枚</span></div>
+                <div class="legend-item"><span class="legend-bar avg-game"></span><span>平均G数</span></div>
+                <div class="legend-item"><span class="legend-bar win-rate"></span><span>勝率</span></div>
+                <div class="legend-item"><span class="legend-bar total-sa"></span><span>総差枚</span></div>
             </div>
         </div>
     </div>
@@ -405,8 +535,10 @@
     <script src="js/utils.js"></script>
     <script src="js/data.js"></script>
     <script src="js/chart.js"></script>
+    <script src="js/hstag.js"></script>
     <script src="js/daily.js"></script>
     <script src="js/trend.js"></script>
+    <script src="js/compare.js"></script>
     <script src="js/calendar.js"></script>
     <script src="js/app.js"></script>
 </body>

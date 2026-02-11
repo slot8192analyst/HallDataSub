@@ -3499,3 +3499,884 @@ td .position-tag.compact {
         --font-size-3xl: 26px;
     }
 }
+
+/* ===================
+   日別比較タブ
+   =================== */
+.compare-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.compare-header h2 {
+    margin: 0 0 5px 0;
+    font-size: var(--font-size-xl);
+}
+
+.compare-description {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    margin: 0;
+}
+
+/* 日付選択エリア */
+.compare-date-selectors {
+    display: flex;
+    align-items: flex-end;
+    gap: 15px;
+    margin-bottom: 15px;
+    padding: 15px;
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    flex-wrap: wrap;
+}
+
+.compare-date-group {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.compare-date-group label {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.compare-date-group select {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: var(--font-size-md);
+}
+
+.compare-date-info {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    min-height: 18px;
+}
+
+.compare-swap-btn-wrapper {
+    display: flex;
+    align-items: center;
+    padding-bottom: 20px;
+}
+
+.btn-swap {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    border: 2px solid var(--primary-hover);
+    color: #fff;
+    font-size: var(--font-size-xl);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-swap:hover {
+    background: var(--primary-hover);
+    transform: rotate(180deg);
+}
+
+/* 比較コントロール */
+.compare-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 15px;
+    align-items: flex-end;
+}
+
+/* サマリーカード */
+.compare-summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.compare-summary-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    padding: 12px 15px;
+    text-align: center;
+    border-left: 3px solid var(--border-color);
+}
+
+.compare-summary-card.card-a {
+    border-left-color: var(--color-info);
+}
+
+.compare-summary-card.card-b {
+    border-left-color: var(--color-warning);
+}
+
+.compare-summary-card.card-diff {
+    border-left-color: var(--color-purple);
+}
+
+.compare-summary-card.card-improved {
+    border-left-color: var(--color-success);
+}
+
+.compare-summary-card.card-declined {
+    border-left-color: var(--color-danger);
+}
+
+.compare-card-label {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.compare-card-value {
+    font-size: var(--font-size-lg);
+    font-weight: bold;
+}
+
+.compare-card-sub {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+/* 比較テーブルの差分セル */
+.compare-diff-positive {
+    color: var(--color-success);
+    font-weight: bold;
+}
+
+.compare-diff-negative {
+    color: var(--color-danger);
+}
+
+.compare-diff-zero {
+    color: var(--text-muted);
+}
+
+.compare-cell-a {
+    background: rgba(96, 165, 250, 0.05);
+}
+
+.compare-cell-b {
+    background: rgba(251, 191, 36, 0.05);
+}
+
+.compare-cell-diff {
+    background: rgba(168, 85, 247, 0.05);
+}
+
+.compare-no-data {
+    color: var(--text-disabled);
+    font-style: italic;
+}
+
+/* 比較グラフ */
+.compare-chart-container {
+    background: var(--bg-surface);
+    border-radius: var(--radius-lg);
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+/* 比較テーブル固定列 */
+#compare-table td:nth-child(1),
+#compare-table th:nth-child(1) {
+    text-align: left;
+    position: sticky;
+    left: 0;
+    z-index: 5;
+    min-width: 120px;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#compare-table th:nth-child(1) {
+    z-index: var(--z-sticky-header);
+    background: var(--table-header-bg);
+    text-align: center;
+}
+
+#compare-table tr:nth-child(even) td:nth-child(1) {
+    background: var(--table-row-even);
+}
+
+#compare-table tr:nth-child(odd) td:nth-child(1) {
+    background: var(--table-row-odd);
+}
+
+/* 機種別モードの2列目も固定 */
+#compare-table.mode-unit td:nth-child(2),
+#compare-table.mode-unit th:nth-child(2) {
+    text-align: left;
+    position: sticky;
+    left: 120px;
+    z-index: 5;
+    min-width: 80px;
+}
+
+#compare-table.mode-unit th:nth-child(2) {
+    z-index: var(--z-sticky-header);
+    background: var(--table-header-bg);
+}
+
+#compare-table.mode-unit tr:nth-child(even) td:nth-child(2) {
+    background: var(--table-row-even);
+}
+
+#compare-table.mode-unit tr:nth-child(odd) td:nth-child(2) {
+    background: var(--table-row-odd);
+}
+
+/* ヘッダーの色分け */
+#compare-table th.header-a {
+    background: rgba(96, 165, 250, 0.15);
+    color: var(--color-info);
+}
+
+#compare-table th.header-b {
+    background: rgba(251, 191, 36, 0.15);
+    color: var(--color-warning);
+}
+
+#compare-table th.header-diff {
+    background: rgba(168, 85, 247, 0.15);
+    color: var(--color-purple);
+}
+
+/* ===================
+   レスポンシブ: スマホ
+   =================== */
+@media (max-width: 480px) {
+    .compare-date-selectors {
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .compare-date-group {
+        min-width: 100%;
+    }
+
+    .compare-swap-btn-wrapper {
+        align-self: center;
+        padding-bottom: 0;
+    }
+
+    .btn-swap {
+        width: 36px;
+        height: 36px;
+        font-size: var(--font-size-lg);
+        transform: rotate(90deg);
+    }
+
+    .btn-swap:hover {
+        transform: rotate(270deg);
+    }
+
+    .compare-summary-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .compare-chart-container {
+        padding: 10px;
+    }
+
+    #compare-table td:nth-child(1),
+    #compare-table th:nth-child(1) {
+        min-width: 100px;
+        max-width: 130px;
+    }
+}
+
+/* ===================
+   高設定タグ
+   =================== */
+.high-setting-tag-config {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.filter-hint {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    margin: 0 0 4px 0;
+    line-height: 1.5;
+}
+
+/* 条件グループ */
+.tag-groups-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.tag-group {
+    background: var(--bg-base);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.tag-group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: var(--bg-elevated);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.tag-group-title {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-purple);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tag-group-title .group-number {
+    background: var(--color-purple);
+    color: #fff;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-xs);
+}
+
+.tag-group-remove {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid var(--color-danger);
+    color: var(--color-danger);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
+    transition: all var(--transition-fast);
+}
+
+.tag-group-remove:hover {
+    background: var(--color-danger);
+    color: #fff;
+}
+
+.tag-group-body {
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* OR区切りラベル */
+.tag-group-or-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 2px 0;
+}
+
+.tag-group-or-divider::before,
+.tag-group-or-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-color);
+}
+
+.tag-group-or-label {
+    font-size: var(--font-size-xs);
+    font-weight: bold;
+    color: var(--color-warning);
+    background: var(--bg-surface);
+    padding: 2px 12px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--color-warning);
+}
+
+/* 条件行 */
+.tag-condition-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.tag-condition-row select,
+.tag-condition-row input {
+    padding: 6px 8px;
+    font-size: var(--font-size-sm);
+    min-width: 0;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+}
+
+.tag-condition-row select:focus,
+.tag-condition-row input:focus {
+    outline: none;
+    border-color: var(--border-focus);
+}
+
+.tag-condition-row select.condition-column {
+    min-width: 90px;
+}
+
+.tag-condition-row select.condition-operator {
+    min-width: 55px;
+}
+
+.tag-condition-row input.condition-value {
+    width: 80px;
+}
+
+.tag-condition-unit {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.tag-condition-and-label {
+    font-size: var(--font-size-xs);
+    color: var(--color-info);
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.tag-condition-remove {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid var(--color-danger);
+    color: var(--color-danger);
+    font-size: 11px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: all var(--transition-fast);
+}
+
+.tag-condition-remove:hover {
+    background: var(--color-danger);
+    color: #fff;
+}
+
+.tag-group-add-condition {
+    padding: 4px 10px;
+    font-size: var(--font-size-xs);
+    background: var(--bg-input);
+    border: 1px dashed var(--border-light);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    align-self: flex-start;
+}
+
+.tag-group-add-condition:hover {
+    border-color: var(--color-info);
+    color: var(--color-info);
+    background: var(--bg-elevated);
+}
+
+/* グループ追加ボタン */
+.tag-groups-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* プリセット */
+.tag-preset-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-top: 8px;
+    border-top: 1px solid var(--border-color);
+}
+
+.tag-preset-label {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.tag-preset-buttons {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.preset-btn {
+    padding: 5px 12px;
+    font-size: var(--font-size-sm);
+    background: var(--bg-input);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.preset-btn:hover {
+    background: var(--primary-dark);
+    border-color: var(--primary-color);
+    color: var(--text-primary);
+}
+
+/* タグ表示オプション */
+.tag-display-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding-top: 8px;
+    border-top: 1px solid var(--border-color);
+}
+
+.tag-count-display {
+    font-size: var(--font-size-sm);
+    color: var(--color-purple);
+    font-weight: bold;
+    margin-left: auto;
+}
+
+/* テーブル内の高設定タグ */
+.high-setting-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.high-setting-tag.tag-high {
+    background: rgba(251, 191, 36, 0.2);
+    border: 1px solid var(--color-warning);
+    color: var(--color-warning);
+}
+
+.high-setting-tag.tag-none {
+    display: none;
+}
+
+/* サマリー内のタグカウント */
+.compare-tag-summary {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--bg-surface);
+    border-radius: var(--radius-sm);
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+
+.compare-tag-summary-item {
+    font-size: var(--font-size-sm);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* ===================
+   レスポンシブ: スマホ
+   =================== */
+@media (max-width: 480px) {
+    .tag-condition-row {
+        gap: 4px;
+    }
+
+    .tag-condition-row select.condition-column {
+        min-width: 80px;
+        flex: 1;
+    }
+
+    .tag-condition-row input.condition-value {
+        width: 60px;
+        flex: 1;
+    }
+
+    .tag-logic-row,
+    .tag-preset-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .tag-display-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .tag-count-display {
+        margin-left: 0;
+    }
+
+    .tag-group-or-label {
+        font-size: 10px;
+    }
+}
+
+/* ===================
+   高設定タグ分析
+   =================== */
+.compare-analysis-container {
+    background: var(--bg-surface);
+    border-radius: var(--radius-lg);
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.analysis-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.analysis-header h4 {
+    margin: 0;
+    font-size: var(--font-size-md);
+    color: var(--text-secondary);
+}
+
+.analysis-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* 分析サマリーカード */
+.analysis-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.analysis-card {
+    background: var(--bg-base);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    text-align: center;
+    border-top: 3px solid var(--border-color);
+}
+
+.analysis-card.card-total {
+    border-top-color: var(--color-info);
+}
+
+.analysis-card.card-tag-rate {
+    border-top-color: var(--color-warning);
+}
+
+.analysis-card.card-repeat {
+    border-top-color: var(--color-success);
+}
+
+.analysis-card.card-recovery {
+    border-top-color: var(--color-purple);
+}
+
+.analysis-card .analysis-card-label {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.analysis-card .analysis-card-value {
+    font-size: var(--font-size-xl);
+    font-weight: bold;
+}
+
+.analysis-card .analysis-card-sub {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    margin-top: 3px;
+}
+
+/* 分析テーブル群 */
+.analysis-tables {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.analysis-table-block {
+    background: var(--bg-base);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.analysis-table-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: var(--bg-elevated);
+    border-bottom: 1px solid var(--border-color);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.analysis-table-title .title-icon {
+    font-size: var(--font-size-md);
+}
+
+.analysis-table-wrapper {
+    overflow-x: auto;
+}
+
+.analysis-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--font-size-sm);
+}
+
+.analysis-table th,
+.analysis-table td {
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    text-align: center;
+    white-space: nowrap;
+}
+
+.analysis-table th {
+    background: var(--bg-card);
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    position: sticky;
+    top: 0;
+}
+
+.analysis-table td:first-child {
+    text-align: left;
+    font-weight: 500;
+    min-width: 80px;
+}
+
+.analysis-table tr:nth-child(even) {
+    background: var(--bg-elevated);
+}
+
+.analysis-table tr:nth-child(odd) {
+    background: var(--bg-base);
+}
+
+/* パーセントバー */
+.pct-bar-cell {
+    position: relative;
+    min-width: 100px;
+}
+
+.pct-bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    opacity: 0.15;
+    border-radius: 0 2px 2px 0;
+}
+
+.pct-bar.bar-high {
+    background: var(--color-warning);
+}
+
+.pct-bar.bar-mid {
+    background: var(--color-info);
+}
+
+.pct-bar.bar-low {
+    background: var(--color-danger);
+}
+
+.pct-text {
+    position: relative;
+    z-index: 1;
+    font-weight: bold;
+}
+
+.pct-text.high {
+    color: var(--color-warning);
+}
+
+.pct-text.mid {
+    color: var(--text-primary);
+}
+
+.pct-text.low {
+    color: var(--text-muted);
+}
+
+/* 機種別テーブル */
+.analysis-machine-table td:first-child {
+    min-width: 120px;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 分析なしメッセージ */
+.analysis-empty {
+    text-align: center;
+    padding: 30px 20px;
+    color: var(--text-muted);
+    font-size: var(--font-size-sm);
+}
+
+/* ===================
+   レスポンシブ
+   =================== */
+@media (max-width: 480px) {
+    .compare-analysis-container {
+        padding: 10px;
+    }
+
+    .analysis-summary {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .analysis-card .analysis-card-value {
+        font-size: var(--font-size-lg);
+    }
+
+    .analysis-table th,
+    .analysis-table td {
+        padding: 6px 8px;
+        font-size: var(--font-size-xs);
+    }
+
+    .analysis-table td:first-child {
+        min-width: 60px;
+    }
+}
