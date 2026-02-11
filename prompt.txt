@@ -36,6 +36,8 @@ C:.
         calendar.js
         chart.js
         config.js
+        compare.js
+        hstag.js
         daily.js
         data.js
         stats.js
